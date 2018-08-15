@@ -55,18 +55,41 @@ function getTareas(req, res) {
   Param 1: a handle to the request object
   Param 2: a handle to the response object
  */
-function postTarea(req, res) {
-  // variables defined in the Swagger document can be referenced using req.swagger.params.{parameter_name}
-  Task.create(req.body, function (err,newtarea){
-    newtarea.save(function(err) {
-      if (err)
-        res.status(500).send(err);
-      console.log(newtarea);
-      res.status(200).json(newtarea);
-    });
-  })
+ function postTarea(request, response) {
+   let Error = [];
+   Task.create(request.body, function (err, tarea) {
+       if (err) {
+         Error.push({
+           titulo: "Solicitud incorrecta",
+           detalle: "El valor de un atributo es incorrecto",
+           link: request.url,
+           estado: "404"
+         })
+         return response.status(400).json({ errors: Error })
+       }
+       else
+         if (tarea) {
 
-}
+           tarea.save((err) => {
+             if (err) {
+               Error.push({
+                 titulo: "Error interno del servidor",
+                 detalle: "falló comunicación con la BD",
+                 link: request.url,
+                 estado: "500"
+               })
+               return response.status(400).json({ errors: Error })
+             }
+             else
+               return response.status(200).json({ link: request.url });
+             console.log(tarea);
+
+
+           })
+         }
+
+   });
+ }
 
 /**
  * @param {Object} req: a handle to the request object
